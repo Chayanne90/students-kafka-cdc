@@ -12,16 +12,14 @@ public record Submission(
         SubmissionStatus status,
         OffsetDateTime submittedAt ) {
 
-    public Boolean conBeGraded() {
+
+   /* if not returned it can be graded*/
+    public Boolean canBeGraded() {
         return status != SubmissionStatus.RETURNED;
     }
 
+    /* Only graded work can be returned */
     public Boolean canBeReturned() {
         return status == SubmissionStatus.GRADED;
     }
-
-
-
-
-
 }
