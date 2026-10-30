@@ -36,8 +36,8 @@ public class SubmissionController {
     @PostMapping
     public ResponseEntity<Submission> create(@Valid @RequestBody CreateSubmissionRequest request) {
 
-        Submission created = repository.create(request.studentID(), request.courseID(), request.assignmentID());
-        URI location = URI.create("/submissions" + created.id());
+        Submission created = repository.create(request.studentId(), request.courseId(), request.assignmentId());
+        URI location = URI.create("api/v1/submissions" + created.id());
         return ResponseEntity.created(location).body(created);
     }
 

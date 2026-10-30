@@ -32,14 +32,14 @@ public class SubmissionRepository {
         this.jdbc = jdbc;
     }
 
-    public Submission create(String studentID, String courseID, String assigmentID) {
+    public Submission create(String studentId, String courseId, String assignmentId) {
         return jdbc.sql("""
-                        INSERT INTO submissions (student_id, course_id, assignment_ig
-                        VALUES (: studentID, :courseID, :assigmentID)
+                        INSERT INTO submissions (student_id, course_id, assignment_id)
+                        VALUES (:studentId, :courseId, :assignmentId)
                         RETURNING\s""" + columns)
-                .param("studentID", studentID)
-                .param("courseID", courseID)
-                .param("assigmentID", assigmentID)
+                .param("studentId", studentId)
+                .param("courseId", courseId)
+                .param("assignmentId", assignmentId)
                 .query(row_mapper)
                 .single();
     }
@@ -51,9 +51,9 @@ public class SubmissionRepository {
                 .optional();
     }
 
-    public List<Submission> findByCourse(String courseID) {
+    public List<Submission> findByCourse(String courseId) {
         return jdbc.sql("SELECT" + columns + "FROM submissions WHERE course_id = :courseID")
-                .param("courseID", courseID)
+                .param("courseID", courseId)
                 .query(row_mapper)
                 .list();
     }
