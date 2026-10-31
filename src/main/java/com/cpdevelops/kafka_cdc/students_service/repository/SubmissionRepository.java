@@ -45,35 +45,62 @@ public class SubmissionRepository {
     }
 
     public Optional<Submission> findById(long id) {
-        return jdbc.sql("SELECT" + columns + "FROM submissions WHERE id = :id")
+        return jdbc.sql("SELECT " + columns + " FROM submissions WHERE id = :id")
+                .param("id", id)
+                .query(row_mapper)
+                .optional();
+    }
+    public Optional<Submission> findByIdForUpdate(long id) {
+        return jdbc.sql("SELECT " + columns + " FROM submissions WHERE id = :id FOR UPDATE")
                 .param("id", id)
                 .query(row_mapper)
                 .optional();
     }
 
-    public List<Submission> findByCourse(String courseId) {
-        return jdbc.sql("SELECT" + columns + "FROM submissions WHERE course_id = :courseID")
-                .param("courseID", courseId)
+    public List<Submission> findByCourseId(String courseId) {
+        return jdbc.sql("SELECT " + columns + " FROM submissions WHERE course_id = :courseId ORDER BY id")
+                .param("courseId", courseId)
                 .query(row_mapper)
                 .list();
     }
 
-    public Optional<Submission> grade(long id, BigDecimal score) {
+    public Submission updateScoreAndStatus(long id, BigDecimal score, SubmissionStatus status) {
         return jdbc.sql("""
-                UPDATE submissions SET score = :score, status = 'GRADED'
-                WHERE id = :id
-                RETURNING\s""" + columns)
+                        UPDATE submissions SET score = :score, status = :status
+                        WHERE id = :id
+                        RETURNING\s""" + columns)
                 .param("score",score)
+                .param("status", status)
                 .param("id", id)
                 .query(row_mapper)
-                .optional();
+                .single();
     }
 
-    public boolean delete(long id) {
-        int rowsDeleted = jdbc.sql("DELETE FROM submissions WHERE id = :id")
+    public Submission updateStatus(long id, SubmissionStatus status) {
+        return jdbc.sql("""
+                UPDATE submissions SET status = :status
+                WHERE ID = :id
+                RETURNING\s""" + columns)
+                .param("status", status.name())
                 .param("id",id)
-                .update();
+                .query(row_mapper)
+                .single();
+    }
 
-        return rowsDeleted > 0;
+//    public Optional<Submission> grade(long id, BigDecimal score) {
+//        return jdbc.sql("""
+//                UPDATE submissions SET score = :score, status = 'GRADED'
+//                WHERE id = :id
+//                RETURNING\s""" + columns)
+//                .param("score",score)
+//                .param("id", id)
+//                .query(row_mapper)
+//                .optional();
+//    }
+
+    public boolean delete(long id) {
+        return jdbc.sql("DELETE FROM submissions WHERE id = :id")
+                .param("id",id)
+                .update() > 0;
     }
 }
