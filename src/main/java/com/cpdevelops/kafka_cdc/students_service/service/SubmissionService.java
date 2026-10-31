@@ -38,7 +38,7 @@ public class SubmissionService {
     }
 
     @Transactional
-    public Submission grade(long id, BigDecimal score){
+    public Submission grade(long id, BigDecimal score) {
         Submission current = repository.findByIdForUpdate(id)
                 .orElseThrow(() -> new SubmissionNotFoundException(id));
 
@@ -59,7 +59,6 @@ public class SubmissionService {
             throw new InvalidSubmissionStateException(
                     "Submission " + id + " is " + current.status() + "; only GRADED submissions can be returned"
             );
-
         }
         return repository.updateStatus(id, SubmissionStatus.RETURNED);
     }

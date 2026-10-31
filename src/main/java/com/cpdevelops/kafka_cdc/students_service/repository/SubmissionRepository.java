@@ -50,6 +50,7 @@ public class SubmissionRepository {
                 .query(row_mapper)
                 .optional();
     }
+
     public Optional<Submission> findByIdForUpdate(long id) {
         return jdbc.sql("SELECT " + columns + " FROM submissions WHERE id = :id FOR UPDATE")
                 .param("id", id)
@@ -70,7 +71,7 @@ public class SubmissionRepository {
                         WHERE id = :id
                         RETURNING\s""" + columns)
                 .param("score",score)
-                .param("status", status)
+                .param("status", status.name())
                 .param("id", id)
                 .query(row_mapper)
                 .single();
@@ -86,17 +87,6 @@ public class SubmissionRepository {
                 .query(row_mapper)
                 .single();
     }
-
-//    public Optional<Submission> grade(long id, BigDecimal score) {
-//        return jdbc.sql("""
-//                UPDATE submissions SET score = :score, status = 'GRADED'
-//                WHERE id = :id
-//                RETURNING\s""" + columns)
-//                .param("score",score)
-//                .param("id", id)
-//                .query(row_mapper)
-//                .optional();
-//    }
 
     public boolean deleteById(long id) {
         return jdbc.sql("DELETE FROM submissions WHERE id = :id")
