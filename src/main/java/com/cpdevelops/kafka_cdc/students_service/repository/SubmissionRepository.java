@@ -32,7 +32,7 @@ public class SubmissionRepository {
         this.jdbc = jdbc;
     }
 
-    public Submission create(String studentId, String courseId, String assignmentId) {
+    public Submission insert(String studentId, String courseId, String assignmentId) {
         return jdbc.sql("""
                         INSERT INTO submissions (student_id, course_id, assignment_id)
                         VALUES (:studentId, :courseId, :assignmentId)
@@ -98,7 +98,7 @@ public class SubmissionRepository {
 //                .optional();
 //    }
 
-    public boolean delete(long id) {
+    public boolean deleteById(long id) {
         return jdbc.sql("DELETE FROM submissions WHERE id = :id")
                 .param("id",id)
                 .update() > 0;
