@@ -1,4 +1,8 @@
 spring:
+  mvc:
+    problemdetails:
+      enabled: true
+
   output:
     ansi:
       enabled: always
