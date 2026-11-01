@@ -2,7 +2,6 @@ spring:
   mvc:
     problemdetails:
       enabled: true
-
   output:
     ansi:
       enabled: always
@@ -18,8 +17,27 @@ spring:
 
   flyway:
     enabled: true
+
   kafka:
     bootstrap-servers: ${HOST}:${K_PORT}
+    consumer:
+      auto-offset-reset: earliest
+      max-poll-records: 50
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enabled.idempotence: true
+    listener:
+      ack-mode: record
+app:
+  cdc:
+    source-topic: edu.public.submissions
+    events-topic: edu.submission.events
+    row-schema: submission-row-v1
 
 management:
   endpoints:
