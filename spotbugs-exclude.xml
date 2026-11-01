@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!--
+      EI_EXPOSE_REP / EI_EXPOSE_REP2: "storing or returning a mutable object".
+      Spring injects shared beans (KafkaTemplate, JsonMapper) through constructors,
+      and our records hold JsonNode references. Both are intentional, so these
+      warnings are false positives for this project.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>
