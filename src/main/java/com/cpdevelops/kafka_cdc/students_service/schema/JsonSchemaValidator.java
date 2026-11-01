@@ -1,6 +1,6 @@
 package com.cpdevelops.kafka_cdc.students_service.schema;
 
-import com.cpdevelops.kafka_cdc.students_service.exception.SchemaValidationException;
+import com.cpdevelops.kafka_cdc.students_service.exceptions.SchemaValidationException;
 import com.networknt.schema.Error;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.Schema;
