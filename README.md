@@ -1,5 +1,3 @@
 # students-kafka-cdc
 
-````
 
-```
