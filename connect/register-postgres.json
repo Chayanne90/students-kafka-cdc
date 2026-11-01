@@ -1,0 +1,26 @@
+{
+  "name": "submissions-cdc",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+
+    "database.hostname": "${env:HOST}",
+    "database.port": "${env:DB_PORT}",
+    "database.user": "${env:DB_USER}",
+    "database.password": "${env:DB_PASSWORD}",
+    "database.dbname": "${env:DB_NAME}",
+
+    "topic.prefix": "edu",
+    "table.include.list": "public.submissions",
+
+    "plugin.name": "pgoutput",
+    "slot.name": "submissions_slot",
+    "publication.name": "submissions_publication",
+    "publication.autocreate.mode": "filtered",
+
+    "snapshot.mode": "initial",
+    "decimal.handling.mode": "double",
+    "tombstones.on.delete": "false",
+    "heartbeat.interval.ms": "10000"
+  }
+}
