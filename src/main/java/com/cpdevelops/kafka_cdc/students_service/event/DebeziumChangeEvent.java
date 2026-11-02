@@ -18,7 +18,7 @@ public record DebeziumChangeEvent(
 
         JsonNode source = root.get("source");
         return new DebeziumChangeEvent(
-                root.get("op").toString(),
+                root.get("op").asString(),
                 root.get("before"),
                 root.get("after"),
                 source.path("lsn").asLong(0L),
