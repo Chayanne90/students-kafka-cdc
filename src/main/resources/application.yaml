@@ -37,7 +37,15 @@ app:
   cdc:
     source-topic: edu.public.submissions
     events-topic: edu.submission-events
+    dead-letter-topic: edu.public.submissions-dlt
     row-schema: submission-row-v1
+    retry:
+      max-retries: 3
+      initial-interval: 500ms
+      multiplier: 2.0
+      max-interval: 5s
+      failure-simulation:
+        enabled: false
 management:
   endpoints:
     web:
