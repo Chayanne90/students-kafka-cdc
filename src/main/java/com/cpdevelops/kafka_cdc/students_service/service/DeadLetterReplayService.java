@@ -112,6 +112,17 @@ public class DeadLetterReplayService {
 
     private static int replayCount(ConsumerRecord<String, String> record) {
         Header header = record.headers().lastHeader(REPLAY_COUNT_HEADER);
-        return header == null ? 0 : Integer.parseInt(new String(header.value(), StandardCharsets.UTF_8));
+        if (header == null) {
+            return 0;
+        }
+
+        String headerValue = new String(header.value(), StandardCharsets.UTF_8);
+        try {
+            return Integer.parseInt(headerValue);
+        } catch (NumberFormatException e) {
+            log.warn("Invalid {} header value '{}' for key {}. Defaulting replay count to 0.",
+                    REPLAY_COUNT_HEADER, headerValue, record.key());
+            return 0;
+        }
     }
 }
