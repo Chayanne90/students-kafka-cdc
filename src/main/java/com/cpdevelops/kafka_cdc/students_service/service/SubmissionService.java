@@ -5,6 +5,8 @@ import com.cpdevelops.kafka_cdc.students_service.exceptions.SubmissionNotFoundEx
 import com.cpdevelops.kafka_cdc.students_service.model.Submission;
 import com.cpdevelops.kafka_cdc.students_service.model.SubmissionStatus;
 import com.cpdevelops.kafka_cdc.students_service.repository.SubmissionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ import java.util.List;
 @Service
 public class SubmissionService {
 
+    private static final Logger log = LoggerFactory.getLogger(SubmissionService.class);
     private final SubmissionRepository repository;
 
 
@@ -23,7 +26,11 @@ public class SubmissionService {
 
     @Transactional
     public Submission submit(String studentId, String courseId, String assignmentId) {
-        return repository.insert(studentId,courseId,assignmentId);
+
+        Submission created = repository.insert(studentId,courseId,assignmentId);
+        log.info("REST: created submission {} for student {} in course {}",
+                created.id(), studentId, courseId);
+        return created;
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +54,10 @@ public class SubmissionService {
                     "Submission " + id + " is " + current.status() + " and no longer be graded"
             );
         }
-        return repository.updateScoreAndStatus(id, score, SubmissionStatus.GRADED);
+
+        Submission graded = repository.updateScoreAndStatus(id, score, SubmissionStatus.GRADED);
+        log.info("REST: graded submission {} with score {}", id, score);
+        return graded;
     }
 
 
@@ -60,12 +70,17 @@ public class SubmissionService {
                     "Submission " + id + " is " + current.status() + "; only GRADED submissions can be returned"
             );
         }
-        return repository.updateStatus(id, SubmissionStatus.RETURNED);
+        Submission returned = repository.updateStatus(id, SubmissionStatus.RETURNED);
+        log.info("REST: returned submission {} to student", id);
+        return returned;
     }
 
     @Transactional
     public void delete(long id) {
-        if(!repository.deleteById(id)) throw new SubmissionNotFoundException(id);
+        if(!repository.deleteById(id)){
+            throw new SubmissionNotFoundException(id);
+        }
+        log.info("REST: deleted submission {}", id);
     }
 
 }

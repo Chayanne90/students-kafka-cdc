@@ -17,7 +17,7 @@ public enum ChangeType {
             case "u" -> UPDATED;
             case "d" -> DEELTED;
             case "r" -> SNAPSHOT;
-            default -> throw new InvalidSubmissionStateException("Unsupported Debezium op: " + op );
+            default -> throw new InvalidSubmissionStateException("Unsupported Debezium op: '" + op + "'");
         };
 
     }

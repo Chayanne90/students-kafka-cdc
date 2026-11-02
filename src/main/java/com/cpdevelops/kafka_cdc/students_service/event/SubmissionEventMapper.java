@@ -23,7 +23,7 @@ public class SubmissionEventMapper {
                 submissionId,
                 row.get("student_id").asString(),
                 row.get("course_id").asString(),
-                row.get("assigment_id").asString(),
+                row.get("assignment_id").asString(),
                 row.hasNonNull("score") ? BigDecimal.valueOf(row.get("score").asDouble()) : null,
                 row.get("status").asString(),
                 Instant.parse(row.get("submitted_at").asString()),
