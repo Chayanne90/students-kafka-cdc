@@ -37,6 +37,7 @@ app:
   cdc:
     source-topic: edu.public.submissions
     events-topic: edu.submission-events
+    dead-letter-topic: edu.public.submissions-dlt
     row-schema: submission-row-v1
     retry:
       max-retries: 3

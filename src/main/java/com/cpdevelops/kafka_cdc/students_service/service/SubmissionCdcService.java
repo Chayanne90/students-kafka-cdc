@@ -14,6 +14,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
+
 @Service
 public class SubmissionCdcService {
 
@@ -24,15 +25,18 @@ public class SubmissionCdcService {
     private final SubmissionEventMapper eventMapper;
     private final SubmissionEventPublisher publisher;
     private final CdcProperties properties;
+    private final FailureSimulator failureSimulator;
 
     public SubmissionCdcService(JsonMapper jsonMapper, JsonSchemaValidator schemaValidator,
                                 SubmissionEventMapper eventMapper, SubmissionEventPublisher publisher,
-                                CdcProperties properties) {
+                                CdcProperties propertie, FailureSimulator failureSimulator) {
         this.jsonMapper = jsonMapper;
         this.schemaValidator = schemaValidator;
         this.eventMapper = eventMapper;
         this.publisher = publisher;
-        this.properties = properties;
+        this.properties = propertie;
+        this.failureSimulator = failureSimulator;
+
     }
 
 
@@ -53,6 +57,9 @@ public class SubmissionCdcService {
 
         // 3. Map the raw row to our clean event
         SubmissionEvent event = eventMapper.toEvent(change, row);
+
+        // Testing aid: may throw a TransientProcessingException when enabled
+        failureSimulator.maybeFail(event);
 
         // 4. Validate our own output against the event contract
         schemaValidator.validate("submission-event-v" + event.schemaVersion(), jsonMapper.writeValueAsString(event));

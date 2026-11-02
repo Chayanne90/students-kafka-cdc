@@ -2,7 +2,7 @@ package com.cpdevelops.kafka_cdc.students_service.kafka.producer;
 
 import com.cpdevelops.kafka_cdc.students_service.config.CdcProperties;
 import com.cpdevelops.kafka_cdc.students_service.event.SubmissionEvent;
-import com.cpdevelops.kafka_cdc.students_service.exceptions.EventPublishingExecption;
+import com.cpdevelops.kafka_cdc.students_service.exceptions.EventPublishingException;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +47,9 @@ public class SubmissionEventPublisher {
                     topic, result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new EventPublishingExecption("Interrupted while publishing " + event.eventId(), e);
+            throw new EventPublishingException("Interrupted while publishing " + event.eventId(), e);
         } catch (ExecutionException | TimeoutException e) {
-            throw new EventPublishingExecption("Kafka did not confirm event " + event.eventId(), e);
+            throw new EventPublishingException("Kafka did not confirm event " + event.eventId(), e);
         }
 
     }

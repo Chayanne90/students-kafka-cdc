@@ -13,6 +13,15 @@ public record CdcProperties(
         Retry retry,
         FailureSimulation failureSimulation) {
 
+    public CdcProperties {
+        if (retry == null) {
+            retry = new Retry(3, Duration.ofMillis(500), 2.0, Duration.ofSeconds(5));
+        }
+        if (failureSimulation == null) {
+            failureSimulation = new FailureSimulation(false);
+        }
+    }
+
     public record Retry(
             int maxRetries,
             Duration initialInterval,
