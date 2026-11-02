@@ -1,5 +1,6 @@
 package com.cpdevelops.kafka_cdc.students_service.kafka.producer;
 
+import com.cpdevelops.kafka_cdc.students_service.config.CdcProperties;
 import com.cpdevelops.kafka_cdc.students_service.event.SubmissionEvent;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.EventPublishingExecption;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+
 @Component
 public class SubmissionEventPublisher {
 
@@ -22,10 +24,12 @@ public class SubmissionEventPublisher {
     private final JsonMapper jsonMapper;
     private final String topic;
 
-    public SubmissionEventPublisher(KafkaTemplate<String, String> kafkaTemplate, JsonMapper jsonMapper, String topic) {
+    public SubmissionEventPublisher(KafkaTemplate<String, String> kafkaTemplate,
+                                    JsonMapper jsonMapper,
+                                    CdcProperties properties) {
         this.kafkaTemplate = kafkaTemplate;
         this.jsonMapper = jsonMapper;
-        this.topic = topic;
+        this.topic = properties.eventsTopic();
     }
 
     public  void publish(SubmissionEvent event) {
@@ -38,8 +42,9 @@ public class SubmissionEventPublisher {
 
         try {
             SendResult<String, String> result = kafkaTemplate.send(record).get(10, TimeUnit.SECONDS);
-            log.info("Published {} V{} for submission {} -> {}-{}@{}",
-                    event.changeType(),event.schemaVersion(),event.submissionId());
+            log.info("Published {} V{} for submission {} -> {} {} @{}",
+                    event.changeType(),event.schemaVersion(),event.submissionId(),
+                    topic, result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new EventPublishingExecption("Interrupted while publishing " + event.eventId(), e);

@@ -17,7 +17,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Service
 public class SubmissionCdcService {
 
-    private static final Logger log = LoggerFactory.getLogger(SubmissionEventPublisher.class);
+    private static final Logger log = LoggerFactory.getLogger(SubmissionCdcService.class);
 
     private final JsonMapper jsonMapper;
     private final JsonSchemaValidator schemaValidator;

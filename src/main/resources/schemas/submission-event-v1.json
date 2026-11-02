@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/submission-event-v1.json",
+  "title": "SubmissionEvent v1",
+  "type": "object",
+  "required": ["eventId", "schemaVersion", "changeType", "submissionId", "studentId",
+    "courseId", "assignmentId", "status", "submittedAt", "occurredAt"],
+  "properties": {
+    "eventId":       { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": 1 },
+    "changeType":    { "enum": ["CREATED", "UPDATED", "DELETED", "SNAPSHOT"] },
+    "submissionId":  { "type": "integer" },
+    "studentId":     { "type": "string", "minLength": 1 },
+    "courseId":      { "type": "string", "minLength": 1 },
+    "assignmentId":  { "type": "string", "minLength": 1 },
+    "score":         { "type": "number", "minimum": 0, "maximum": 100 },
+    "status":        { "enum": ["SUBMITTED", "GRADED", "RETURNED"] },
+    "submittedAt":   { "type": "string", "format": "date-time" },
+    "occurredAt":    { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

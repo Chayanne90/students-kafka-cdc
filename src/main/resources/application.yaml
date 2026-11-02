@@ -30,15 +30,14 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
       properties:
-        enabled.idempotence: true
+        enable.idempotence: true
     listener:
       ack-mode: record
 app:
   cdc:
     source-topic: edu.public.submissions
-    events-topic: edu.submission.events
+    events-topic: edu.submission-events
     row-schema: submission-row-v1
-
 management:
   endpoints:
     web:

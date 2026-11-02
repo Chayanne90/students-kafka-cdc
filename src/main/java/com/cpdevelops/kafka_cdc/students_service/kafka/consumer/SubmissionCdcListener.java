@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubmissionCdcListener {
 
-    private static final Logger log = LoggerFactory.getLogger(SubmissionEventPublisher.class);
+    private static final Logger log = LoggerFactory.getLogger(SubmissionCdcListener.class);
      private final SubmissionCdcService service;
 
     public SubmissionCdcListener(SubmissionCdcService service) {
