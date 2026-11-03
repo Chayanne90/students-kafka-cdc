@@ -1,6 +1,8 @@
 package com.cpdevelops.kafka_cdc.students_service.config;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.InvalidChangeEventException;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.SchemaValidationException;
+import com.cpdevelops.kafka_cdc.students_service.metrics.CdcMetrics;
+import io.micrometer.core.instrument.Timer;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +21,13 @@ public class KafkaErrorHandlingConfig {
 
     @Bean
     public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, String> kafkaTemplate,
-                                                 CdcProperties properties) {
+                                                 CdcProperties properties, CdcMetrics metrics) {
 
         // 1. Where failed records go: the dead-letter topic, partition chosen by Kafka from the key
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, exception) -> new TopicPartition(properties.deadLetterTopic(), -1));
+
+        Timer.Sample sample = metrics.startProcessing();
 
         // 2. How retries are spaced: exponential backoff with a retry limit
         CdcProperties.Retry retry = properties.retry();
@@ -41,10 +45,13 @@ public class KafkaErrorHandlingConfig {
                 SchemaValidationException.class);
 
         // 5. Log every failed attempt, so retries are visible
-        errorHandler.setRetryListeners((record, exception, deliveryAttempt) ->
-                log.warn("Attempt {} failed for {}-{}@{} key={}: {}",
-                        deliveryAttempt, record.topic(), record.partition(), record.offset(), record.key(),
-                        NestedExceptionUtils.getMostSpecificCause(exception).getMessage()));
+        errorHandler.setRetryListeners((record, exception, deliveryAttempt) -> {
+            Throwable cause = NestedExceptionUtils.getMostSpecificCause(exception);
+            metrics.recordFailedAttempt(cause.getClass().getSimpleName());
+            log.warn("Attempt {} failed for {}-{}@{} key={}: {}",
+                    deliveryAttempt, record.topic(), record.partition(), record.offset(), record.key(),
+                    cause.getMessage());
+        });
 
         return errorHandler;
     }

@@ -18,7 +18,7 @@ public class SubmissionCdcListener {
         this.service = service;
     }
 
-    @KafkaListener(id="submission-cdc-listener", topics="${app.cdc.source-topic}", groupId = "submission-cdc-consumer")
+    @KafkaListener(id="submission-cdc-listener", topics="${app.cdc.source-topic}", groupId = "submission-cdc-consumer", concurrency = "${app.cdc.consumer-concurrency:1}")
     public void onMessage(ConsumerRecord<String, String> record) {
 
         log.info("Received change event key={} partition={} offset={}",

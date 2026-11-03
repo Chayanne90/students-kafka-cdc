@@ -18,7 +18,7 @@ public record CdcProperties(
             retry = new Retry(3, Duration.ofMillis(500), 2.0, Duration.ofSeconds(5));
         }
         if (failureSimulation == null) {
-            failureSimulation = new FailureSimulation(false);
+            failureSimulation = new FailureSimulation(false, Duration.ZERO);
         }
     }
 
@@ -29,6 +29,11 @@ public record CdcProperties(
             Duration maxInterval) {
     }
 
-    public record FailureSimulation(boolean enabled) {
+    public record FailureSimulation(boolean enabled, Duration processingDelay) {
+        public FailureSimulation {
+            if (processingDelay == null) {
+                processingDelay = Duration.ZERO;
+            }
+        }
     }
 }

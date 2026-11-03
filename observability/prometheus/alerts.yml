@@ -1,0 +1,25 @@
+groups:
+  - name: cdc-pipeline
+    rules:
+      - alert: CdcConsumerLagHigh
+        expr: max(kafka_consumer_fetch_manager_records_lag_max) > 100
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "CDC consumer is more than 100 messages behind"
+
+      - alert: CdcEndToEndLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(cdc_end_to_end_latency_seconds_bucket[1m]))) > 5
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "95% of CDC events take longer than 5 seconds from commit to publish"
+
+      - alert: CdcDeadLettersArriving
+        expr: increase(cdc_events_dead_lettered_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Records were sent to the dead-letter topic in the last 5 minutes"

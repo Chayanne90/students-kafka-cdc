@@ -6,7 +6,9 @@ import com.cpdevelops.kafka_cdc.students_service.event.SubmissionEvent;
 import com.cpdevelops.kafka_cdc.students_service.event.SubmissionEventMapper;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.InvalidChangeEventException;
 import com.cpdevelops.kafka_cdc.students_service.kafka.producer.SubmissionEventPublisher;
+import com.cpdevelops.kafka_cdc.students_service.metrics.CdcMetrics;
 import com.cpdevelops.kafka_cdc.students_service.schema.JsonSchemaValidator;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,21 +26,22 @@ public class SubmissionCdcService {
     private final JsonSchemaValidator schemaValidator;
     private final SubmissionEventMapper eventMapper;
     private final SubmissionEventPublisher publisher;
+    private final CdcMetrics metrics;
     private final CdcProperties properties;
     private final FailureSimulator failureSimulator;
 
     public SubmissionCdcService(JsonMapper jsonMapper, JsonSchemaValidator schemaValidator,
                                 SubmissionEventMapper eventMapper, SubmissionEventPublisher publisher,
-                                CdcProperties propertie, FailureSimulator failureSimulator) {
+                                CdcProperties propertie, FailureSimulator failureSimulator, CdcMetrics metrics) {
         this.jsonMapper = jsonMapper;
         this.schemaValidator = schemaValidator;
         this.eventMapper = eventMapper;
         this.publisher = publisher;
         this.properties = propertie;
         this.failureSimulator = failureSimulator;
+        this.metrics = metrics;
 
     }
-
 
     public void process(String key, String value) {
 
@@ -47,6 +50,8 @@ public class SubmissionCdcService {
             log.debug("No vlaue for key: " + key);
             return;
         }
+
+        Timer.Sample sample = metrics.startProcessing();
 
         // 1. parse the raw Debesium Envelop
         DebeziumChangeEvent change = DebeziumChangeEvent.from(parse(value));
@@ -59,6 +64,7 @@ public class SubmissionCdcService {
         SubmissionEvent event = eventMapper.toEvent(change, row);
 
         // Testing aid: may throw a TransientProcessingException when enabled
+        failureSimulator.maybeDelay();
         failureSimulator.maybeFail(event);
 
         // 4. Validate our own output against the event contract
@@ -66,6 +72,8 @@ public class SubmissionCdcService {
 
         // 5. Publish and wait for Kafka to confirm
         publisher.publish(event);
+
+        metrics.recordPublished(event, sample);
     }
 
     private JsonNode parse(String value) {
