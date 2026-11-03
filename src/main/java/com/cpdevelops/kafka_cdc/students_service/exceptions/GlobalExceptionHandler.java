@@ -21,4 +21,11 @@ public class GlobalExceptionHandler {
         problem.setTitle("Invalid Submission state");
         return problem;
     }
+
+    @ExceptionHandler(AnalyticsUnavailableException.class)
+    public ProblemDetail AnalyticsUnavailableException(AnalyticsUnavailableException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+        problem.setTitle("Analatics temporarily unavailable");
+        return problem;
+    }
 }
