@@ -1,5 +1,6 @@
 package com.cpdevelops.kafka_cdc.students_service.kafka.consumer;
 
+import com.cpdevelops.kafka_cdc.students_service.metrics.CdcMetrics;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.slf4j.Logger;
@@ -14,7 +15,14 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class DeadLetterInspector {
 
+    private final CdcMetrics metrics;
+
+
     private static final Logger log = LoggerFactory.getLogger(DeadLetterInspector.class);
+
+    public DeadLetterInspector(CdcMetrics metrics) {
+        this.metrics = metrics;
+    }
 
     @KafkaListener(
             id = "dead-letter-inspector",
@@ -22,6 +30,9 @@ public class DeadLetterInspector {
             groupId = "dead-letter-inspector")
     public void onDeadLetter(ConsumerRecord<String, String> record) {
         try {
+
+            String cause = text(record, KafkaHeaders.DLT_EXCEPTION_CAUSE_FQCN);
+            metrics.recordDeadLetter(cause.substring(cause.lastIndexOf('.') + 1));
             log.error("""
                     DEAD LETTER received
                       key:       {}
