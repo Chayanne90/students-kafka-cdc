@@ -2,7 +2,6 @@ package com.cpdevelops.kafka_cdc.students_service.config;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.InvalidChangeEventException;
 import com.cpdevelops.kafka_cdc.students_service.exceptions.SchemaValidationException;
 import com.cpdevelops.kafka_cdc.students_service.metrics.CdcMetrics;
-import io.micrometer.core.instrument.Timer;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ public class KafkaErrorHandlingConfig {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, exception) -> new TopicPartition(properties.deadLetterTopic(), -1));
 
-        Timer.Sample sample = metrics.startProcessing();
+        metrics.startProcessing();
 
         // 2. How retries are spaced: exponential backoff with a retry limit
         CdcProperties.Retry retry = properties.retry();
