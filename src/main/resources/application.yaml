@@ -20,6 +20,14 @@ spring:
 
   kafka:
     bootstrap-servers: ${HOST}:${K_PORT}
+    streams:
+      application-id: students-course-analytics
+      state-dir: ./.kafka-streams-state
+      properties:
+        processing.guarantee: exactly_once_v2
+        num.stream.threads: 1
+        deserialization.exception.handler: org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
+
     consumer:
       auto-offset-reset: earliest
       max-poll-records: 50
@@ -34,6 +42,11 @@ spring:
     listener:
       ack-mode: record
 app:
+  analytics:
+    course-activity-topic: edu.course-activity
+    course-grade-stats-topic: edu.course-grade-stats
+    activity-window: 1m
+    activity-grace: 30s
   cdc:
     source-topic: edu.public.submissions
     events-topic: edu.submission-events

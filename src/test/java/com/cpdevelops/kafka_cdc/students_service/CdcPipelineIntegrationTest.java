@@ -27,7 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {
         "app.cdc.retry.initial-interval=50ms",
-        "app.cdc.retry.max-interval=100ms"
+        "app.cdc.retry.max-interval=100ms",
+        "spring.kafka.streams.auto-startup=false"
 })
 @EmbeddedKafka(
         partitions = 1,

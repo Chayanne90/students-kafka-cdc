@@ -52,7 +52,7 @@ public class SubmissionRepository {
     }
 
     public Optional<Submission> findByIdForUpdate(long id) {
-        return jdbc.sql("SELECT " + columns + " FROM submissions WHERE id = :id FOR UPDATE")
+        return jdbc.sql("SELECT " + columns + " FROM submissions WHERE id = :id")
                 .param("id", id)
                 .query(row_mapper)
                 .optional();

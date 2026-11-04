@@ -27,4 +27,22 @@ public class KafkaTopicConfig {
                 .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(Duration.ofDays(30).toMillis()))
                 .build();
     }
+
+    @Bean
+    public NewTopic courseActivityTopic(AnalyticsProperties analytics) {
+
+        return TopicBuilder.name(analytics.courseActivityTopic())
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic courseGradeStatsTopic(AnalyticsProperties analytics) {
+        return TopicBuilder.name(analytics.courseGradeStatsTopic())
+                .partitions(3)
+                .replicas(1)
+                .compact()
+                .build();
+    }
 }
