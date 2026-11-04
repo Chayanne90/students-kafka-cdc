@@ -20,11 +20,11 @@ public record CourseGradeStats(
         return new CourseGradeStats(courseId, gradedCount+1,totalScore.add(score));
     }
 
-    public CourseGradeStats substract(String courseId, BigDecimal score) {
-        return new CourseGradeStats(courseId, gradedCount-1,totalScore.add(score));
+    public CourseGradeStats subtract(String courseId, BigDecimal score) {
+        return new CourseGradeStats(courseId, gradedCount - 1, totalScore.subtract(score));
     }
 
-    @JsonProperty("avarageScore")
+    @JsonProperty("averageScore")
     public BigDecimal avarageScore() {
         if (gradedCount ==0){
             return null;

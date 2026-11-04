@@ -1,6 +1,7 @@
 package com.cpdevelops.kafka_cdc.students_service.streams;
 
 import com.cpdevelops.kafka_cdc.students_service.config.AnalyticsProperties;
+import com.cpdevelops.kafka_cdc.students_service.config.CdcProperties;
 import com.cpdevelops.kafka_cdc.students_service.event.ChangeType;
 import com.cpdevelops.kafka_cdc.students_service.event.SubmissionEvent;
 import com.cpdevelops.kafka_cdc.students_service.streams.model.CourseActivity;
@@ -24,10 +25,17 @@ public class CourseAnalyticsTopology {
 
     public static final String ACTIVITY_STORE = "course-activity-store";
     public static final String LATEST_SUBMISSION_STORE = "latest-submissions-store";
-    public static final String GRADE_STATS_STORE = " coruse-grade-stats-store";
-
+    public static final String GRADE_STATS_STORE = "course-grade-stats-store";
     @Bean
-    public KStream<String, SubmissionEvent> build(StreamsBuilder builder,
+    public KStream<String, SubmissionEvent> courseAnalyticsStream(StreamsBuilder builder,
+                                                                  JsonMapper jsonMapper,
+                                                                  CdcProperties cdc,
+                                                                  AnalyticsProperties analytics) {
+        return build(builder, jsonMapper, cdc.eventsTopic(), analytics);
+    }
+
+
+    public static KStream<String, SubmissionEvent> build(StreamsBuilder builder,
                                                   JsonMapper jasonMapper,
                                                   String eventsTopic,
                                                   AnalyticsProperties analytics) {
@@ -72,7 +80,7 @@ public class CourseAnalyticsTopology {
                                               Serde<CourseGradeStats> statsSerde,
                                               AnalyticsProperties analytics) {
         KTable<String, SubmissionEvent> latestSubmissions = events
-                .mapValues(event -> event.changeType() == ChangeType.DEELTED ? null : event)
+                .mapValues(event -> event.changeType() == ChangeType.DElETED ? null : event)
                 .toTable(Named.as("latest-submissions"),
                         Materialized.<String, SubmissionEvent, KeyValueStore<Bytes, byte[]>>as(LATEST_SUBMISSION_STORE)
                                 .withKeySerde(Serdes.String())
@@ -85,7 +93,7 @@ public class CourseAnalyticsTopology {
                 .aggregate(
                         CourseGradeStats::empty,
                         (courseId, event, stats) -> stats.add(courseId, event.score()),
-                        (courseId, event, stats) -> stats.substract(courseId, event.score()),
+                        (courseId, event, stats) -> stats.subtract(courseId, event.score()),
                         Materialized.<String, CourseGradeStats, KeyValueStore<Bytes, byte[]>>as(GRADE_STATS_STORE)
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(statsSerde))

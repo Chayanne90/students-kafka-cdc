@@ -32,6 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
+# Kafka
+.kafka-streams-state/
 
 ### maven ###
 

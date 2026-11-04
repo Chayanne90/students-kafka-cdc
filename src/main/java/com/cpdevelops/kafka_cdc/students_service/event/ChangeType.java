@@ -5,7 +5,7 @@ import com.cpdevelops.kafka_cdc.students_service.exceptions.InvalidSubmissionSta
 public enum ChangeType {
     CREATED,
     UPDATED,
-    DEELTED,
+    DElETED,
     SNAPSHOT;
 
 
@@ -15,7 +15,7 @@ public enum ChangeType {
         return switch (op) {
             case "c" -> CREATED;
             case "u" -> UPDATED;
-            case "d" -> DEELTED;
+            case "d" -> DElETED;
             case "r" -> SNAPSHOT;
             default -> throw new InvalidSubmissionStateException("Unsupported Debezium op: '" + op + "'");
         };
