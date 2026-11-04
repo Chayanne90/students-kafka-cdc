@@ -14,44 +14,8 @@ schema evolution.
 ---
 
 ## Architecture
+![Application Screenshot](docs/architecture.png)
 
-```mermaid
-flowchart LR
-    client["Client"] -->|"REST"| api
-
-    subgraph app["Spring Boot: students-service"]
-        api["REST API"]
-        consumer["CDC consumer<br/>validate, map, version"]
-        errors["Error handling<br/>retry + dead-letter"]
-        streams["Kafka Streams<br/>course analytics"]
-        metrics["Metrics"]
-    end
-
-    subgraph db["PostgreSQL"]
-        table[("submissions")]
-        wal["WAL + replication slot"]
-    end
-
-    subgraph kafka["Kafka"]
-        connect["Kafka Connect<br/>+ Debezium"]
-        raw[["raw change events"]]
-        clean[["clean SubmissionEvents"]]
-        dlt[["dead-letter topic"]]
-        analytics[["course analytics"]]
-    end
-
-    subgraph obs["Observability"]
-        prom["Prometheus + alerts"]
-        graf["Grafana"]
-    end
-
-    api --> table --> wal
-    wal -->|"logical replication"| connect --> raw
-    raw --> consumer --> clean
-    consumer -.-> errors -.-> dlt
-    clean --> streams --> analytics
-    metrics --> prom --> graf
-```
 
 The REST side and the event side **never call each other**. They are connected only through the
 database and Kafka, so the API stays fast and available even if Kafka or a consumer is down, and
