@@ -1,7 +1,5 @@
-# Students Service: Kafka CDC Pipeline
+# students-kafka-cdc
 
-![CI](https://github.com/Chayanne90/students-kafka-cdc/actions/workflows/ci.yml/badge.svg)
-![CodeQL](https://github.com/Chayanne90/students-kafka-cdc/actions/workflows/codeql.yml/badge.svg)
 
 An event-driven data pipeline for an education platform. Students submit assignments, teachers grade
 and return them, and every change to that data is streamed **in real time** to downstream systems
