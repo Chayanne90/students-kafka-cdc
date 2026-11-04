@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/submission-row-v2.json",
+  "title": "submissions table row as emitted by Debezium (v2)",
+  "description": "v2 adds the optional late_minutes column. Rows without it (v1 shape) are still valid.",
+  "type": "object",
+  "required": ["id", "student_id", "course_id", "assignment_id", "status", "submitted_at"],
+  "properties": {
+    "id":            { "type": "integer" },
+    "student_id":    { "type": "string", "minLength": 1 },
+    "course_id":     { "type": "string", "minLength": 1 },
+    "assignment_id": { "type": "string", "minLength": 1 },
+    "score":         { "type": ["number", "null"] },
+    "status":        { "enum": ["SUBMITTED", "GRADED", "RETURNED"] },
+    "submitted_at":  { "type": "string", "format": "date-time" },
+    "late_minutes":  { "type": ["integer", "null"], "minimum": 0 }
+  },
+  "additionalProperties": false
+}

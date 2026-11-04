@@ -19,7 +19,8 @@ public record SubmissionEvent(
         BigDecimal score,
         String status,
         Instant submittedAt,
-        Instant occurredAt
+        Instant occurredAt,
+        Integer lateMinutes
 ) {
     public static final int CURRENT_SCHEMA_VERSION = 1;
 }

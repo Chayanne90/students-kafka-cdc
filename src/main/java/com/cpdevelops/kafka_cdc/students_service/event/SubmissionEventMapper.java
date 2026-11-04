@@ -24,10 +24,11 @@ public class SubmissionEventMapper {
                 row.get("student_id").asString(),
                 row.get("course_id").asString(),
                 row.get("assignment_id").asString(),
-                row.hasNonNull("score") ? BigDecimal.valueOf(row.get("score").asDouble()) : null,
+                scoreFrom(row),
                 row.get("status").asString(),
                 Instant.parse(row.get("submitted_at").asString()),
-                Instant.ofEpochMilli(change.sourceTimestamps()));
+                Instant.ofEpochMilli(change.sourceTimestamps()),
+                row.hasNonNull("late_minutes") ? row.get("late_minutes").asInt() : null);
     }
 
     /**
@@ -36,6 +37,18 @@ public class SubmissionEventMapper {
      */
     private static String eventId(long submissionId, DebeziumChangeEvent change) {
         return "%d-%d-%s".formatted(submissionId, change.lsn(), change.op());
+    }
+
+
+    /** During the score -> final_score rename, prefer the new column and fall back to the old one. */
+    private static BigDecimal scoreFrom(JsonNode row) {
+        if (row.hasNonNull("final_score")) {
+            return BigDecimal.valueOf(row.get("final_score").asDouble());
+        }
+        if (row.hasNonNull("score")) {
+            return BigDecimal.valueOf(row.get("score").asDouble());
+        }
+        return null;
     }
 
 
