@@ -1,5 +1,4 @@
-# students-kafka-cdc
-
+# Students Service: Kafka CDC Pipeline
 
 An event-driven data pipeline for an education platform. Students submit assignments, teachers grade
 and return them, and every change to that data is streamed **in real time** to downstream systems
@@ -12,20 +11,61 @@ what makes a pipeline production-ready: failure handling, monitoring of processi
 schema evolution.
 
 
-
 ---
 
 ## Architecture
 
-![Application Screenshot](docs/architeture.png)
+```mermaid
+flowchart LR
+    client["Client"] -->|"REST"| api
 
+    subgraph app["Spring Boot: students-service"]
+        api["REST API"]
+        consumer["CDC consumer<br/>validate, map, version"]
+        errors["Error handling<br/>retry + dead-letter"]
+        streams["Kafka Streams<br/>course analytics"]
+        metrics["Metrics"]
+    end
+
+    subgraph db["PostgreSQL"]
+        table[("submissions")]
+        wal["WAL + replication slot"]
+    end
+
+    subgraph kafka["Kafka"]
+        connect["Kafka Connect<br/>+ Debezium"]
+        raw[["raw change events"]]
+        clean[["clean SubmissionEvents"]]
+        dlt[["dead-letter topic"]]
+        analytics[["course analytics"]]
+    end
+
+    subgraph obs["Observability"]
+        prom["Prometheus + alerts"]
+        graf["Grafana"]
+    end
+
+    api --> table --> wal
+    wal -->|"logical replication"| connect --> raw
+    raw --> consumer --> clean
+    consumer -.-> errors -.-> dlt
+    clean --> streams --> analytics
+    metrics --> prom --> graf
+```
 
 The REST side and the event side **never call each other**. They are connected only through the
 database and Kafka, so the API stays fast and available even if Kafka or a consumer is down, and
 **any** writer to the database produces events, not just this application.
 
 ### How one change flows
+
+
 ![Application Screenshot](docs/one-change-flow.png)
+
+The same flow, live in the terminal: a graded submission appears as a raw Debezium change event, then
+as a clean `SubmissionEvent`, and the course averages computed by Kafka Streams update immediately.
+
+![One change traced through raw Debezium events, clean events, and live Kafka Streams analytics](docs/terminal-pipeline.png)
 
 ---
 
@@ -68,6 +108,19 @@ latency, and dead-letter arrivals, and **Grafana** charts throughput and failure
 covered slow consumers, scaling with partitions and consumer concurrency, rebalances caused by
 exceeding `max.poll.interval.ms`, and upstream delays.
 
+During a burst of 300 changes against a deliberately slowed consumer, lag and end-to-end latency rise,
+the backlog drains, and the failure panels record two dead letters:
+
+![Grafana dashboard during a load spike: consumer lag and latency rise and recover, failures and dead letters are counted](docs/grafana-dashboard.png)
+
+The alert rules fire while the pipeline is behind and when records reach the dead-letter topic:
+
+![Prometheus alerts firing for consumer lag, end-to-end latency, and dead letters](docs/prometheus-alerts.png)
+
+Consumer lag per partition at the peak of the burst:
+
+![kafka-consumer-groups output showing consumer lag during the burst](docs/consumer-lag.png)
+
 ### 6. Real-time analytics with Kafka Streams
 A **Kafka Streams** topology computes live course analytics from the clean events:
 - **Course activity:** new submissions per course in one-minute **event-time windows** with a grace
@@ -107,6 +160,11 @@ current. The `main` branch is protected: nothing merges unless every check passe
 | `edu.course-activity` | Kafka Streams | New submissions per course per minute |
 | `edu.course-grade-stats` | Kafka Streams | Current grade statistics per course (compacted) |
 
+Besides these, the broker holds Kafka Connect's internal topics (configs, offsets, status) and the
+repartition and changelog topics Kafka Streams creates for its state stores:
+
+![All Kafka topics in the running system](docs/kafka-topics.png)
+
 ## Tech stack
 
 | Area | Technology |
@@ -139,8 +197,7 @@ Requires Java 21, Docker, and Kafka installed locally (for example with Homebrew
 2. Start Kafka, then Kafka Connect with the Debezium plugin, and register the connector in `connect/`
 3. Start the application: `./mvnw spring-boot:run`
 
-Full setup steps, including Debezium installation and environment variables, are in the
-[project guide](docs/PROJECT_GUIDE.md).
+
 
 | Service | URL |
 |---|---|
@@ -170,6 +227,5 @@ students-service/
 │   └── schemas/         row and event JSON Schema contracts
 ├── connect/             Kafka Connect worker and Debezium connector configuration
 ├── observability/       Prometheus scrape config, alert rules, Grafana provisioning
-├── docs/                project guide
 └── .github/             CI workflows and Dependabot
 ```
