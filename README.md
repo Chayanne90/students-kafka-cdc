@@ -13,76 +13,21 @@ service, and aggregated into live course analytics with **Kafka Streams**. The p
 what makes a pipeline production-ready: failure handling, monitoring of processing delays, and safe
 schema evolution.
 
-> A detailed walkthrough of every part, decision, and configuration is in
-> [docs/PROJECT_GUIDE.md](docs/PROJECT_GUIDE.md).
+
 
 ---
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    client["Client"] -->|"REST"| api
+![Application Screenshot](docs/architeture.png)
 
-    subgraph app["Spring Boot: students-service"]
-        api["REST API"]
-        consumer["CDC consumer<br/>validate, map, version"]
-        errors["Error handling<br/>retry + dead-letter"]
-        streams["Kafka Streams<br/>course analytics"]
-        metrics["Metrics"]
-    end
-
-    subgraph db["PostgreSQL"]
-        table[("submissions")]
-        wal["WAL + replication slot"]
-    end
-
-    subgraph kafka["Kafka"]
-        connect["Kafka Connect<br/>+ Debezium"]
-        raw[["raw change events"]]
-        clean[["clean SubmissionEvents"]]
-        dlt[["dead-letter topic"]]
-        analytics[["course analytics"]]
-    end
-
-    subgraph obs["Observability"]
-        prom["Prometheus + alerts"]
-        graf["Grafana"]
-    end
-
-    api --> table --> wal
-    wal -->|"logical replication"| connect --> raw
-    raw --> consumer --> clean
-    consumer -.-> errors -.-> dlt
-    clean --> streams --> analytics
-    metrics --> prom --> graf
-```
 
 The REST side and the event side **never call each other**. They are connected only through the
 database and Kafka, so the API stays fast and available even if Kafka or a consumer is down, and
 **any** writer to the database produces events, not just this application.
 
 ### How one change flows
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant API as REST API
-    participant PG as PostgreSQL
-    participant DBZ as Debezium
-    participant K as Kafka
-    participant CDC as CDC consumer
-    participant KS as Kafka Streams
-
-    C->>API: POST / PUT / DELETE submission
-    API->>PG: SQL, committed to the WAL
-    API-->>C: response (request finished)
-    PG->>DBZ: committed change via replication slot
-    DBZ->>K: raw change event
-    K->>CDC: consume
-    CDC->>K: validated, versioned SubmissionEvent
-    K->>KS: update course analytics
-```
+![Application Screenshot](docs/one-change-flow.png)
 
 ---
 
