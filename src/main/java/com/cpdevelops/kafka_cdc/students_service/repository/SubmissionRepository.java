@@ -15,7 +15,7 @@ import java.util.Optional;
 public class SubmissionRepository {
 
     private static final String columns =
-            "id, student_id, course_id, assignment_id, score, status, submitted_at";
+            "id, student_id, course_id, assignment_id, final_score AS score, status, submitted_at";
 
     private static final RowMapper<Submission> row_mapper = (rs, rowNum) -> new Submission(
             rs.getLong("id"),
@@ -67,7 +67,7 @@ public class SubmissionRepository {
 
     public Submission updateScoreAndStatus(long id, BigDecimal score, SubmissionStatus status) {
         return jdbc.sql("""
-                        UPDATE submissions SET score = :score, status = :status
+                        UPDATE submissions SET final_score = :score, status = :status
                         WHERE id = :id
                         RETURNING\s""" + columns)
                 .param("score",score)

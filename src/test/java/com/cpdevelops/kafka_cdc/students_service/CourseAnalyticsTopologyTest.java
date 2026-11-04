@@ -126,6 +126,7 @@ class CourseAnalyticsTopologyTest {
                 score == null ? null : new BigDecimal(score),
                 score == null ? "SUBMITTED" : "GRADED",
                 T0,
-                occurredAt);
+                occurredAt,
+                null);
     }
 }
