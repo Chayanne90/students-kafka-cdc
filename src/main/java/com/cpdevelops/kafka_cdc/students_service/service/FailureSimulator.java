@@ -10,12 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Testing aid: fakes temporary failures so retries and the DLT can be observed.
- * Active only when app.cdc.failure-simulation.enabled=true.
- *   studentId "flaky-..."       -> fails twice, then succeeds
- *   studentId "always-fail-..." -> fails every time
- */
+
 @Component
 public class FailureSimulator {
 

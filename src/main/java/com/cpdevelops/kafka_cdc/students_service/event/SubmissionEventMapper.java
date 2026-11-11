@@ -31,16 +31,11 @@ public class SubmissionEventMapper {
                 row.hasNonNull("late_minutes") ? row.get("late_minutes").asInt() : null);
     }
 
-    /**
-     * The same database change always produces the same eventId,
-     * so consumers can detect duplicates when events are replayed.
-     */
     private static String eventId(long submissionId, DebeziumChangeEvent change) {
         return "%d-%d-%s".formatted(submissionId, change.lsn(), change.op());
     }
 
-
-    /** During the score -> final_score rename, prefer the new column and fall back to the old one. */
+    
     private static BigDecimal scoreFrom(JsonNode row) {
         if (row.hasNonNull("final_score")) {
             return BigDecimal.valueOf(row.get("final_score").asDouble());
