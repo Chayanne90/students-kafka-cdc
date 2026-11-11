@@ -48,7 +48,6 @@ public class DeadLetterInspector {
                     text(record, KafkaHeaders.DLT_EXCEPTION_CAUSE_FQCN),
                     text(record, KafkaHeaders.DLT_EXCEPTION_MESSAGE));
         } catch (RuntimeException e) {
-            // Never let the inspector itself fail: its failures would be sent to the same DLT.
             log.error("Could not inspect dead letter at offset {}", record.offset(), e);
         }
     }

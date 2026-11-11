@@ -14,12 +14,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * A small Schema Registry-style compatibility check between JSON Schema versions.
- * "Can a reader using schema R accept every document valid under writer schema W?"
- *   backward(old, new) = can the NEW schema read OLD data
- *   forward(old, new)  = can the OLD schema read NEW data
- */
+
 class SchemaCompatibilityTest {
 
     /** Fields that change on purpose with every version. */
