@@ -1,4 +1,4 @@
-name: CI
+name: Build and Test
 
 on:
   push:
@@ -18,14 +18,18 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      POSTGRES_USER: ${{ secrets.DB_USER}}
+      POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD}}
+      POSTGRES_DB: ${{ secrets.DB_NAME}}
 
     services:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_USER: ${{ secrets.DB_USER}}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD}}
-          POSTGRES_DB: ${{ secrets.DB_NAME}}
+          POSTGRES_USER: ${{ env.POSTGRES_USER}}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD}}
+          POSTGRES_DB: ${{ env.POSTGRES_DB}}
         ports:
           - ${{ secrets.DB_PORT }}:${{ secrets.DB_PORT }}
         options: >-
